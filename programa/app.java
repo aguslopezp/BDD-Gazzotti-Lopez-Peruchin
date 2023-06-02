@@ -1,3 +1,10 @@
+/*
+  comandos
+  sudo chmod 777
+  javac ConnectionMySQL.java
+  java -classpath ".:mysql-connector-java-8.0.20.jar" ConnectionMySQL
+  java -classpath ".:mysql-connector-java-8.0.20.jar" app.java
+*/
 import java.sql.*;
 import java.util.Scanner;
 
@@ -6,12 +13,12 @@ public class app {
   public static void main(String[] args) {
 
     try {
-      ConnectionMySQL conectMySQL = new Connect();
+      ConnectionMySQL conectMySQL = new ConnectionMySQL();
 
       // Load database driver if not already loaded.
-      Class.forName(driver);
+      //Class.forName(conectMySQL.driver);
       // Establish network connection to database.
-      Connection connection = DriverManager.getConnection(conectMySQL.url, conectMySQL.username, conectMySQL.password);
+      Connection connection = ConnectionMySQL.getInstance();
 
       System.out.print("1) Select persona\n");
       System.out.print("2) Insertar cliente\n");
@@ -48,8 +55,11 @@ public class app {
       String DNI_Cliente = scanner.nextLine();
       System.out.print("Inserte identificador de la clase\n");
       String id_clase = scanner.nextLine();
+      scanner.close();
       try {
-        String query = "INSERT INTO Toma (DNI_Cliente, id_clasee) VALUES (\""+DNI_Cliente+"\", \""+id_clase+"\");";
+        Statement statement = c.createStatement();
+        String query = "INSERT INTO Toma (DNI_Cliente, id_clasee) VALUES (\""+DNI_Cliente+"\", \""+id_clase+"\");"; 
+        
         int resultInsert = statement.executeUpdate(query);
         if(resultInsert==1) {
           System.out.print("Cliente " + DNI_Cliente + " inscripto correctamente a la clase " + id_clase + " \n");
@@ -58,10 +68,10 @@ public class app {
           System.out.print("Error: por favor intente de nuevo \n");
         }
       }
-      catch (ClassNotFoundException cnfe) {
+      /*catch (ClassNotFoundException cnfe) {
         System.err.println("Error loading driver: " + cnfe);
         cnfe.printStackTrace();
-      } 
+      } */
       catch (SQLException sqle) {
         sqle.printStackTrace();
         System.err.println("Error connecting: " + sqle);
@@ -115,10 +125,10 @@ public class app {
           System.out.print("\n   ");
         }
       }
-      catch (ClassNotFoundException cnfe) {
+      /*catch (ClassNotFoundException cnfe) {
         System.err.println("Error loading driver: " + cnfe);
         cnfe.printStackTrace();
-      } 
+      } */
       catch (SQLException sqle) {
         sqle.printStackTrace();
         System.err.println("Error connecting: " + sqle);
