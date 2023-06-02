@@ -6,15 +6,12 @@ public class app {
   public static void main(String[] args) {
 
     try {
-      String driver = "com.mysql.cj.jdbc.Driver";
-      String url = "jdbc:mysql://localhost:3306/prueba?serverTimezone=UTC";
-      String username = "root";
-      String password = "root";
+      ConnectionMySQL conectMySQL = new Connect();
 
       // Load database driver if not already loaded.
       Class.forName(driver);
       // Establish network connection to database.
-      Connection connection = DriverManager.getConnection(url, username, password);
+      Connection connection = DriverManager.getConnection(conectMySQL.url, conectMySQL.username, conectMySQL.password);
 
       System.out.print("1) Select persona\n");
       System.out.print("2) Insertar cliente\n");
@@ -22,17 +19,17 @@ public class app {
       Scanner scanner = new Scanner(System.in);
       int selected = scanner.nextInt();
       while(selected != 3){
-        System.out.print("1) Select persona\n");
-        System.out.print("2) Insertar cliente\n");
-        System.out.print("3) Salir\n");
+        System.out.print("1) Insertar cliente.\n");
+        System.out.print("2) Inscribir cliente a una clase.\n");
+        System.out.print("3) Salir.\n");
         switch (selected){
           case 1: 
-            selectPersona(connection);
+            insertClass(connection);
             selected = 0;
             selected = scanner.nextInt();
           break;
-          case 2: 
-            insertClass(connection);
+          case 2:
+            insertClientClass(connection);
             selected = 0;
             selected = scanner.nextInt();
           break;
@@ -45,25 +42,26 @@ public class app {
 
   }
 
-    public static void selectPersona(Connection c) {
-      try{
-        String query = "SELECT * FROM persona ";
-        PreparedStatement statement = c.prepareStatement(query); // statement.setString(1, "2");
-        ResultSet resultSet = statement.executeQuery(); // Send query to database and store results.
-  
-        // Print results.
-        while (resultSet.next()) {
-          System.out.print(" DNI: " + resultSet.getString("DNI"));
-          System.out.print("; Nombre: " + resultSet.getString("nombre"));
-          System.out.print("; Email: " + resultSet.getString("email"));
-          System.out.print("\n   ");
-          System.out.print("\n   ");
+    public static void insertClientClass(Connection c) {
+      Scanner scanner = new Scanner(System.in);
+      System.out.print("Inserte el dni del cliente\n");
+      String DNI_Cliente = scanner.nextLine();
+      System.out.print("Inserte identificador de la clase\n");
+      String id_clase = scanner.nextLine();
+      try {
+        String query = "INSERT INTO Toma (DNI_Cliente, id_clasee) VALUES (\""+DNI_Cliente+"\", \""+id_clase+"\");";
+        int resultInsert = statement.executeUpdate(query);
+        if(resultInsert==1) {
+          System.out.print("Cliente " + DNI_Cliente + " inscripto correctamente a la clase " + id_clase + " \n");
+        }
+        else {
+          System.out.print("Error: por favor intente de nuevo \n");
         }
       }
-      // catch (ClassNotFoundException cnfe) {
-      //   System.err.println("Error loading driver: " + cnfe);
-      //   cnfe.printStackTrace();
-      // } 
+      catch (ClassNotFoundException cnfe) {
+        System.err.println("Error loading driver: " + cnfe);
+        cnfe.printStackTrace();
+      } 
       catch (SQLException sqle) {
         sqle.printStackTrace();
         System.err.println("Error connecting: " + sqle);
@@ -100,4 +98,33 @@ public class app {
       }
       catch(Exception e){ System.out.println(e);} 
     }
-}
+
+    public static void listClientClass(Connection c) {
+      try {
+        String query = "CREATE TEMPORARY TABLE clasesTomadas AS SELECT Cliente.DNI_Cliente as dni_cliente, Cliente.nombre, Cliente.apellido, Toma.id_clase FROM Cliente LEFT JOIN Toma ON Cliente.DNI_Cliente = Toma.DNI_Cliente;     SELECT clasesTomadas.DNI_Cliente, clasesTomadas.nombre AS Nombre, clasesTomadas.apellido AS Apellido, Clase_Teorica.nombre AS 'Nombre Clase' FROM clasesTomadas INNER JOIN Clase_Teorica ON clasesTomadas.id_clase = Clase_Teorica.id_clase;" ;
+        PreparedStatement statement = c.prepareStatement(query);
+        ResultSet resultSet = statement.executeQuery();
+        
+        // Print results.
+        while (resultSet.next()) {
+          System.out.print(" DNI Cliente: " + resultSet.getString("DNI_Cliente"));
+          System.out.print("; Nombre cliente: " + resultSet.getString("Nombre"));
+          System.out.print("; Apellido cliente: " + resultSet.getString("Apellido"));
+          System.out.print("; Clase que toma: " + resultSet.getString("Nombre Clase"));
+          System.out.print("\n   ");
+          System.out.print("\n   ");
+        }
+      }
+      catch (ClassNotFoundException cnfe) {
+        System.err.println("Error loading driver: " + cnfe);
+        cnfe.printStackTrace();
+      } 
+      catch (SQLException sqle) {
+        sqle.printStackTrace();
+        System.err.println("Error connecting: " + sqle);
+      } catch (Exception sqle) {
+        sqle.printStackTrace();
+        System.err.println("Error connecting: " + sqle);
+      }
+    }
+  }
